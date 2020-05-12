@@ -1,0 +1,15 @@
+{
+  "name": "@packages/coffee",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.js",
+  "scripts": {
+    "clean-deps": "rm -rf node_modules"
+  },
+  "dependencies": {
+    "coffeescript": "1.12.7"
+  },
+  "files": [
+    "register.js"
+  ]
+}

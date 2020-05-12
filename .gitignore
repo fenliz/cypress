@@ -2,11 +2,9 @@
 ### Cypress Custom .gitignore ###
 *.log.*
 dist-*
-build
 .history
 .publish
 _test-output
-cypress.zip
 
 # from extension
 Cached Theme.pak

@@ -1,0 +1,21 @@
+{
+  "name": "@packages/driver",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "clean-deps": "rm -rf node_modules",
+    "cypress:open": "node ../../scripts/cypress open --project ./test",
+    "cypress:run": "node ../../scripts/cypress run --project ./test",
+    "postinstall": "patch-package",
+    "start": "node test/support/server.js"
+  },
+  "files": [
+    "lib",
+    "patches"
+  ],
+  "workspaces": {
+    "nohoist": [
+      "*"
+    ]
+  }
+}
