@@ -6,6 +6,7 @@ import { Command } from 'marionette-client/lib/marionette/message.js'
 import util from 'util'
 import Foxdriver from '@benmalka/foxdriver'
 import protocol from './protocol'
+import os from 'os'
 
 const errors = require('../errors')
 
@@ -140,13 +141,14 @@ export default {
 
   setup ({
     extensions,
+    browserInstance,
     url,
     marionettePort,
     foxdriverPort,
   }) {
     return Bluebird.all([
       this.setupFoxdriver(foxdriverPort),
-      this.setupMarionette(extensions, url, marionettePort),
+      this.setupMarionette(browserInstance, extensions, url, marionettePort),
     ])
   },
 
@@ -219,10 +221,13 @@ export default {
     }
   },
 
-  async setupMarionette (extensions, url, port) {
+  async setupMarionette (browserInstance, extensions, url, port) {
     const driver = new Marionette.Drivers.Promises({ port })
 
     const sendMarionette = (data) => {
+      // GeckoDriver commands:
+      // @see https://searchfox.org/mozilla-central/rev/0688ffdef223dac527c2fcdb25560118c4e4df51/testing/marionette/driver.js#3906
+
       return driver.send(new Command(data))
     }
 
@@ -275,7 +280,21 @@ export default {
       .catch(_onError('commands'))
     })
 
-    // even though Marionette is not used past this point, we have to keep the session open
-    // or else `acceptInsecureCerts` will cease to apply and SSL validation prompts will appear.
+    if (os.platform() === 'win32') {
+      // on win32, firefox is not linked to the parent cmd.exe process, so we must use marionette
+      // to force close firefox
+      // @see https://github.com/cypress-io/cypress/issues/6392
+      browserInstance.kill = () => {
+        sendMarionette({
+          name: 'Marionette:Quit',
+          parameters: {
+            flags: 'eForceQuit',
+          },
+        })
+      }
+    }
+
+    // NOTE: Marionette must run for the entirety of the browser session, or else `acceptInsecureCerts`
+    // will cease to apply and SSL validation prompts will appear
   },
 }
